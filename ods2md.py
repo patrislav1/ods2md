@@ -85,9 +85,11 @@ def main(odf_path, out_file):
 
             print('|', end='', file=out_file)
             for m, content in enumerate(contents):
-                if content in table_names:
-                    content_ref = content.lower().replace(' ', '-')
-                    content = f'[{content}](#{content_ref})'
+                content_name = content.replace('[]', '').strip()
+                content_remainder = content[len(content_name):]
+                if content_name in table_names:
+                    content_ref = content_name.lower().replace(' ', '-')
+                    content = f'[{content_name}](#{content_ref}){content_remainder}'
                 column_width = column_widths[m]
                 if not column_width:
                     continue
