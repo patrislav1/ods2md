@@ -4,6 +4,7 @@ import unittest
 import os.path
 import io
 
+
 class Test(unittest.TestCase):
     def perform_test(self, base):
         output = io.StringIO()
@@ -16,3 +17,9 @@ class Test(unittest.TestCase):
 
     def test_padded(self):
         self.perform_test('padded')
+
+    def test_padded(self):
+        self.perform_test('padded')
+
+    def test_multitable(self):
+        self.perform_test('multitable')

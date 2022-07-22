@@ -19,7 +19,10 @@
 
 from __future__ import print_function
 
-import ezodf, sys, re, unicodedata
+import ezodf
+import sys
+import re
+import unicodedata
 
 # Ref: http://stackoverflow.com/a/31666966/224671
 DISPLAY_WIDTH = {
@@ -31,7 +34,8 @@ DISPLAY_WIDTH = {
     'W': 2,
 }
 
-LINEFEED_REGEX=re.compile('\r\n|[\r\n]')
+LINEFEED_REGEX = re.compile('\r\n|[\r\n]')
+
 
 def display_text(cell):
     v = cell.value
@@ -42,24 +46,39 @@ def display_text(cell):
     else:
         return LINEFEED_REGEX.sub('<br>', str(v))
 
+
 def display_len(s):
     return sum(DISPLAY_WIDTH[unicodedata.east_asian_width(c)] for c in s)
+
 
 def main(odf_path, out_file):
     ods = ezodf.opendoc(odf_path)
 
     for sheet in ods.sheets:
-        column_widths = [max(display_len(display_text(cell)) for cell in column) for column in sheet.columns()]
+        column_widths = [max(display_len(display_text(cell))
+                             for cell in column) for column in sheet.columns()]
         if not any(column_widths):
             continue
 
-        print('##', sheet.name, file=out_file)
+        print('#', sheet.name, file=out_file)
         printed_header = False
 
         for row in sheet.rows():
             contents = [display_text(cell) for cell in row]
             if not any(contents):
+                printed_header = False
                 continue
+
+            if not printed_header:
+                print()
+                if len(contents) > 1 and contents[0] != '' and contents[1] == '':
+                    print('<br>')
+                    print()
+                    print('## ' + contents[0])
+                    comments = ', '.join(c for c in contents[2:] if c != '')
+                    if comments != '':
+                        print(comments)
+                    continue
 
             print('|', end='', file=out_file)
             for m, content in enumerate(contents):
@@ -67,7 +86,8 @@ def main(odf_path, out_file):
                 if not column_width:
                     continue
                 disp_len = column_width + len(content) - display_len(content)
-                print(' {0:<{1}}'.format(content, disp_len), end=' |', file=out_file)
+                print(' {0:<{1}}'.format(content, disp_len),
+                      end=' |', file=out_file)
             print(file=out_file)
 
             if not printed_header:
@@ -75,8 +95,10 @@ def main(odf_path, out_file):
                 print('|', end='', file=out_file)
                 for w in column_widths:
                     if w:
-                        print(':', '-' * (w+1), '|', sep='', end='', file=out_file)
+                        print(':', '-' * (w+1), '|',
+                              sep='', end='', file=out_file)
                 print(file=out_file)
+
 
 if __name__ == '__main__':
     main(sys.argv[1], sys.stdout)
