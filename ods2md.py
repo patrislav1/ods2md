@@ -60,6 +60,9 @@ def main(odf_path, out_file):
         if not any(column_widths):
             continue
 
+        table_names = set(display_text(cell[0]) for cell in sheet.rows()
+                          if display_text(cell[0]) and not any(display_text(c) for c in cell[1:]))
+
         print('#', sheet.name, file=out_file)
         printed_header = False
 
@@ -82,6 +85,9 @@ def main(odf_path, out_file):
 
             print('|', end='', file=out_file)
             for m, content in enumerate(contents):
+                if content in table_names:
+                    content_ref = content.lower().replace(' ', '-')
+                    content = f'[{content}](#{content_ref})'
                 column_width = column_widths[m]
                 if not column_width:
                     continue
