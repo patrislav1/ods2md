@@ -5,3 +5,4 @@ env/
 *.pyc
 *.pyo
 .DS_Store
+*.md
